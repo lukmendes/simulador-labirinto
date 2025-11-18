@@ -75,6 +75,16 @@ public static int[] encontraPosicaoInicial(char[][] mapa);
 
 # 👤 Parte desenvolvida por: **Jilson**
 
+Minha responsabilidade no grupo é implementar toda a parte relacionada à **Movimentação do jogador**, incluindo:
+
+
+Criar a função responsável por mover o jogador (W, A, S, D).
+ Impedir movimentos inválidos (paredes, fora do mapa).
+ Atualizar a posição na matriz ( @ )
+ Detectar chegada na saída S .
+ Detectar itens (caso existam) e retornar o efeito
+
+
 
 ---
 
