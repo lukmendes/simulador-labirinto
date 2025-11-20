@@ -93,3 +93,47 @@ Minha responsabilidade no grupo é implementar toda a parte relacionada à **Mov
 ---
 
 # 👤 Parte desenvolvida por: **Pedro**
+
+Implementei o **Fluxo de Jogo aprimorado no `SimuladorLabirinto.java`**, integrando movimentação, limites, mensagens claras e controle completo da execução do labirinto.
+
+Minhas entregas incluem:
+
+### ✔ 1. Limite de Movimentos por Dificuldade
+
+Cada nível de dificuldade agora define um número máximo de passos que o jogador pode realizar.
+Ao longo da partida, cada movimento reduz esse total, e o jogo termina automaticamente ao atingir zero.
+
+### ✔ 2. Limite de Visualizações do Mapa
+
+Incluí a variável `qtdVisuMapa`, que controla quantas vezes o jogador pode pressionar **E** para exibir o mapa completo.
+Quando esse limite chega a zero, o jogo informa claramente ao jogador e impede novas visualizações.
+
+### ✔ 3. Exibição de Status Clara e Organizada
+
+Toda ação do jogador exibe um painel de status com:
+
+* Movimentos restantes
+* Visualizações restantes
+* Posição atual do jogador
+* Comandos disponíveis
+
+Isso orienta o jogador a cada turno.
+
+### ✔ 4. Fluxo Principal do Jogo
+
+Implementei a lógica completa do loop principal do labirinto, incluindo:
+
+* Interpretação dos comandos
+* Chamadas ao método de movimentação (criado por Jilson)
+* Atualização da posição do jogador
+* Verificação da chegada à saída
+* Controle de erros e comandos inválidos
+* Mensagens informativas e consistentes
+
+O jogo agora apresenta uma experiência estruturada, clara e com feedback imediato ao usuário.
+
+### ✔ 5. Sistema de Exibição do Mapa com Tratamento de Erros
+
+Ao tentar exibir o mapa sem visualizações disponíveis, o jogo trata o erro de forma controlada e amigável, evitando falhas e mantendo a integridade da partida.
+
+---
