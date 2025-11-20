@@ -5,176 +5,215 @@ import java.util.Scanner;
 public class SimuladorLabirinto {
 
     public static void main(String[] args) {
+
         Scanner scan = new Scanner(System.in);
 
+        int movimentos, qtdVisuMapa;
         int dificuldade = exibeMenuEscolha(scan);
-        char[][] mapa = criaMapa(dificuldade);
-        int[] pos = encontraPosicaoInicial(mapa);
-        
-        // Verifica se a posição inicial foi encontrada
-        if (pos == null) {
-             System.out.println("Erro: Posição inicial 'P' não encontrada no mapa.");
-             return; 
+
+        if (dificuldade == 1) {
+            qtdVisuMapa = 5;
+            movimentos = 100;
+        } else if (dificuldade == 2) {
+            qtdVisuMapa = 3;
+            movimentos = 240;
+        } else {
+            qtdVisuMapa = 1;
+            movimentos = 540;
         }
 
-        // Atualiza a posição inicial 'P' para o símbolo de jogador '@'
+        char[][] mapa = criaMapa(dificuldade);
+        int[] pos = encontraPosicaoInicial(mapa);
+
+        if (pos == null) {
+            System.out.println("Erro: Posição inicial 'P' não encontrada.");
+            return;
+        }
+
         mapa[pos[0]][pos[1]] = '@';
 
-        int movimentos = 0;
         boolean jogoAtivo = true;
+        boolean mostrarMapa = true;
 
-        System.out.println("\n--- Jogo Iniciado ---");
+        System.out.println("\n====================================");
+        System.out.println("           JOGO INICIADO            ");
+        System.out.println("====================================");
 
         while (jogoAtivo) {
-            exibeMapa(mapa);
-            System.out.println("Movimentos: " + movimentos);
-            System.out.println("Posição atual: (" + pos[0] + ", " + pos[1] + ")");
-            System.out.print("Mover (W/A/S/D) ou Sair (X): ");
-            
-            // Lógica para consumir a linha (caso tenha sobrado algo) e ler a entrada
+
+            if (mostrarMapa) {
+                exibeMapa(mapa);
+                mostrarMapa = false;
+            }
+
+            exibirStatus(movimentos, qtdVisuMapa, pos);
+
             String entrada = scan.next();
 
             if (entrada.equalsIgnoreCase("X")) {
-                jogoAtivo = false;
-                System.out.println("\nJogo encerrado por desistência.");
+                System.out.println("Jogo encerrado.");
                 break;
             }
 
-            if (entrada.length() != 1) {
-                System.out.println("Entrada inválida. Use apenas uma letra (W, A, S, D, X).");
+            if (entrada.equalsIgnoreCase("E")) {
+                if (qtdVisuMapa > 0) {
+                    qtdVisuMapa--;
+                    mostrarMapa = true;
+                } else {
+                    System.out.println("Você não possui mais visualizações.");
+                }
                 continue;
             }
 
-            char direcao = entrada.charAt(0);
-            
-            // Chama a função de movimentação do jogador
-            Object[] resultadoMovimento = moverJogador(mapa, pos, direcao);
-            
-            boolean movimentoValido = (boolean) resultadoMovimento[0];
-            int[] novaPos = (int[]) resultadoMovimento[1];
-            // boolean encontrouItem = (boolean) resultadoMovimento[2]; // Sempre false no momento
-            boolean chegouSaida = (boolean) resultadoMovimento[3];
-
-            if (movimentoValido) {
-                pos = novaPos; // Atualiza a posição
-                movimentos++;
-                System.out.println("Movimento válido!");
-
-                if (chegouSaida) {
-                    System.out.println("\n🎉 PARABÉNS! Você encontrou a saída 'S'!");
-                    System.out.println("Total de movimentos: " + movimentos);
-                    jogoAtivo = false;
-                }
-            } else {
-                System.out.println("Movimento inválido! Você bateu na parede ou saiu do mapa.");
+            if (entrada.length() != 1) {
+                System.out.println("Entrada inválida.");
+                continue;
             }
-            System.out.println("-------------------------");
+
+            char direcao = entrada.toUpperCase().charAt(0);
+
+            Object[] resultado = moverJogador(mapa, pos, direcao);
+
+            boolean movimentoValido = (boolean) resultado[0];
+            boolean chegouSaida = (boolean) resultado[2];
+
+            if (!movimentoValido) {
+                System.out.println("Movimento inválido!");
+                continue;
+            }
+
+            pos = (int[]) resultado[1];
+            movimentos--;
+
+            // Corrigido: Vitória deve ser verificada ANTES da derrota.
+            if (chegouSaida) {
+                System.out.println("\n====================================");
+                System.out.println("           PARABÉNS!");
+                System.out.println("       Você encontrou a saída!");
+                System.out.println("====================================");
+                break;
+            }
+
+            if (movimentos <= 0) {
+                System.out.println("\n====================================");
+                System.out.println("        FIM DE JOGO");
+                System.out.println("    Movimentos esgotados");
+                System.out.println("====================================");
+                break;
+            }
         }
+
         scan.close();
     }
 
-    /**
-     * Tenta mover o jogador no mapa.
-     */
-    public static Object[] moverJogador(char[][] mapa, int[] posAtual, char direcao) {
-        int linhaAtual = posAtual[0];
-        int colunaAtual = posAtual[1];
-        int novaLinha = linhaAtual;
-        int novaColuna = colunaAtual;
-
-        // 1. Determina a nova posição
-        switch (Character.toUpperCase(direcao)) {
-            case 'W': // Cima
-                novaLinha--;
-                break;
-            case 'S': // Baixo
-                novaLinha++;
-                break;
-            case 'A': // Esquerda
-                novaColuna--;
-                break;
-            case 'D': // Direita
-                novaColuna++;
-                break;
-            default:
-                // Retorna movimento inválido se a direção não for reconhecida
-                return new Object[]{false, posAtual, false, false};
-        }
-
-        // 2. Verifica se a nova posição é válida (fora do mapa ou parede '#')
-        int linhas = mapa.length;
-        int colunas = mapa[0].length;
-
-        boolean foraDoMapa = (novaLinha < 0 || novaLinha >= linhas || novaColuna < 0 || novaColuna >= colunas);
-        if (foraDoMapa) {
-            return new Object[]{false, posAtual, false, false}; // Movimento inválido: fora do mapa
-        }
-
-        char destino = mapa[novaLinha][novaColuna];
-
-        // 3. Verifica se bateu na parede
-        if (destino == '#') {
-            return new Object[]{false, posAtual, false, false}; // Movimento inválido: parede
-        }
-        
-        // Se chegou aqui, o movimento é válido (caminho '.' ou saída 'S')
-
-        // 4. Se o destino é a saída 'S'
-        boolean chegouSaida = (destino == 'S');
-        
-        // 5. Atualiza o mapa: marca a nova posição com '@' e a antiga com '.'
-        mapa[novaLinha][novaColuna] = '@';
-        mapa[linhaAtual][colunaAtual] = '.'; 
-
-        // Retorna o resultado: [movimento válido, nova posição, encontrou item, chegou saída]
-        return new Object[]{true, new int[]{novaLinha, novaColuna}, false, chegouSaida};
+    // ---------- Exibir Status ----------
+    public static void exibirStatus(int movimentos, int qtdVisuMapa, int[] pos) {
+        System.out.println("====================================");
+        System.out.println("            STATUS DO JOGADOR       ");
+        System.out.println("====================================");
+        System.out.println("Movimentos restantes : " + movimentos);
+        System.out.println("Visualizações mapa   : " + qtdVisuMapa);
+        System.out.println("Posição atual        : (" + pos[0] + ", " + pos[1] + ")");
+        System.out.println("------------------------------------");
+        System.out.print("Ação [W/A/S/D] | Ver Mapa [E] | Sair [X]: ");
     }
 
+    // ---------- Mover Jogador ----------
+    public static Object[] moverJogador(char[][] mapa, int[] pos, char direcao) {
+
+        int r = pos[0], c = pos[1];
+        int nr = r, nc = c;
+
+        switch (direcao) {
+            case 'W': nr--; break;
+            case 'S': nr++; break;
+            case 'A': nc--; break;
+            case 'D': nc++; break;
+            default:  return new Object[]{false, pos, false};
+        }
+
+        if (nr < 0 || nr >= mapa.length || nc < 0 || nc >= mapa[0].length)
+            return new Object[]{false, pos, false};
+
+        char destino = mapa[nr][nc];
+
+        if (destino == '#')
+            return new Object[]{false, pos, false};
+
+        boolean chegouSaida = (destino == 'S');
+
+        mapa[nr][nc] = '@';
+        mapa[r][c] = '.';
+
+        return new Object[]{true, new int[]{nr, nc}, chegouSaida};
+    }
+
+    // ---------- Menu ----------
     public static int exibeMenuEscolha(Scanner scan) {
-        String menu = """
-                Escolha o tamanho do mapa:
-                1 - Fácil (10x10);
-                2 - Médio (20x20);
-                3 - Difícil (30x30); """;
-        System.out.println(menu);
-        int escolha = 0;
-        while (escolha < 1 || escolha > 3) {
-            System.out.print("Digite 1, 2 ou 3: ");
+        System.out.println("====================================");
+        System.out.println("             INSTRUÇÕES              ");
+        System.out.println("====================================");
+        System.out.println("Objetivo: alcance o destino (S) antes que seus movimentos acabem.");
+        System.out.println();
+        System.out.println("COMANDOS:");
+        System.out.println("  W - mover para cima");
+        System.out.println("  S - mover para baixo");
+        System.out.println("  A - mover para a esquerda");
+        System.out.println("  D - mover para a direita");
+        System.out.println("  E - exibir o mapa (usa 1 visualização)");
+        System.out.println("  X - sair do jogo");
+        System.out.println();
+        System.out.println("REGRAS:");
+        System.out.println("  • Cada movimento gasta 1 ponto de movimentação.");
+        System.out.println("  • Você possui um número limitado de visualizações do mapa.");
+        System.out.println("  • Ao zerar as visualizações, a tecla 'E' não terá efeito.");
+        System.out.println("  • Fique atento à sua posição e planeje seus movimentos.");
+
+        System.out.println("""
+        ====================================
+                  ESCOLHA O MAPA
+        ====================================
+        1 - Fácil   (10x10)
+        2 - Médio   (20x20)
+        3 - Difícil (30x30)
+        """);
+
+        int op = 0;
+        while (op < 1 || op > 3) {
+            System.out.print("Opção: ");
             if (scan.hasNextInt()) {
-                escolha = scan.nextInt();
+                op = scan.nextInt();
             } else {
-                System.out.println("Entrada inválida. Digite um número.");
-                scan.next(); // Limpa entrada inválida
+                scan.next();
             }
         }
-        return escolha;
+        return op;
     }
 
+    // ---------- Encontrar P ----------
+    public static int[] encontraPosicaoInicial(char[][] mapa) {
+        for (int i = 0; i < mapa.length; i++)
+            for (int j = 0; j < mapa[i].length; j++)
+                if (mapa[i][j] == 'P')
+                    return new int[]{i, j};
+        return null;
+    }
+
+    // ---------- Exibir Mapa ----------
     public static void exibeMapa(char[][] mapa) {
         System.out.println();
-        for (int i = 0; i < mapa.length; i++) {
-            for (int j = 0; j < mapa[i].length; j++) {
-                System.out.print(mapa[i][j] + " ");
-            }
+        for (char[] linha : mapa) {
+            for (char c : linha) System.out.print(c + " ");
             System.out.println();
         }
+        System.out.println();
     }
 
-    public static int[] encontraPosicaoInicial(char[][] mapa) {
-        for (int i = 0; i < mapa.length; i++) {
-            for (int j = 0; j < mapa[i].length; j++) {
-                // Procura por 'P'
-                if (mapa[i][j] == 'P') {
-                    return new int[] {i, j};
-                }
-            }
-        }
-        return null; // Retorna nulo se 'P' não for encontrado
-    }
-
+    // ---------- Mapas ----------
     public static char[][] criaMapa(int dificuldade) {
         switch (dificuldade) {
             case 1:
+                // Mapa Fácil 10x10
                 return new char[][]{
                         {'P', '.', '.', '#', '#', '.', '.', '.', '.', '.'},
                         {'#', '#', '.', '#', '.', '.', '#', '#', '#', '.'},
@@ -188,7 +227,7 @@ public class SimuladorLabirinto {
                         {'.', '.', '.', '.', '#', '#', '#', '#', '#', 'S'}
                 };
             case 2:
-                // O seu mapa 2 tinha 21 linhas. Corrigi o tamanho da última linha para 20 colunas.
+                // Mapa Médio 20x20
                 return new char[][]{
                         {'P', '.', '.', '.', '#', '.', '.', '.', '.', '.', '.', '.', '#', '.', '.', '.', '.', '.', '.', '.'},
                         {'.', '#', '#', '.', '#', '.', '#', '#', '#', '#', '#', '.', '#', '.', '#', '#', '#', '#', '#', '.'},
@@ -212,7 +251,7 @@ public class SimuladorLabirinto {
                         {'.', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '.', '#', '#', '#', 'S'}
                 };
             case 3:
-                 // O seu mapa 3 tinha 31 linhas. Corrigi o tamanho da última linha para 30 colunas.
+                 // Mapa Díficil 30x30
                 return new char[][]{
                         {'P', '.', '.', '.', '#', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'},
                         {'.', '#', '#', '.', '#', '.', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '.'},
