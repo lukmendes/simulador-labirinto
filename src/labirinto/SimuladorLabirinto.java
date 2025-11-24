@@ -186,10 +186,13 @@ public class SimuladorLabirinto {
 
     // ---------- 3. Encontra P ----------
     public static int[] encontraPosicaoInicial(char[][] mapa) {
-        for (int i = 0; i < mapa.length; i++)
-            for (int j = 0; j < mapa[i].length; j++)
-                if (mapa[i][j] == 'P')
+        for (int i = 0; i < mapa.length; i++) {
+            for (int j = 0; j < mapa[i].length; j++) {
+                if (mapa[i][j] == 'P') {
                     return new int[]{i, j};
+                }
+            }
+        }
         return null;
     }
 
