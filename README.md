@@ -57,7 +57,7 @@ O método `exibeMapa` é responsável por imprimir o estado atual do labirinto n
 public static void exibeMapa(char[][] mapa);
 ```
 
-Estrutura: Utiliza for aninhado para percorrer e exibir a matriz.
+Estrutura: Utiliza `for` aninhado para percorrer e exibir a matriz.
 
 ### 4. Localização da Posição Inicial
 
@@ -135,5 +135,99 @@ O jogo agora apresenta uma experiência estruturada, clara e com feedback imedia
 ### ✔ 5. Sistema de Exibição do Mapa com Tratamento de Erros
 
 Ao tentar exibir o mapa sem visualizações disponíveis, o jogo trata o erro de forma controlada e amigável, evitando falhas e mantendo a integridade da partida.
+
+---
+
+---
+
+# ⚙️ Funções Extras e Organização (Lucas)
+
+Além das funções principais atribuídas a mim no projeto, implementei também uma série de **melhorias extras** e **organizações estruturais** para tornar o código mais claro, fácil de apresentar e simples para integração com os colegas.
+
+Essas entregas adicionais foram realizadas para melhorar a usabilidade, leitura do código e padronização geral do projeto.
+
+---
+
+## ✔ 1. Reorganização Completa dos Métodos
+
+Reorganizei todas as funções do arquivo `SimuladorLabirinto.java` para seguirem **a mesma ordem lógica** do fluxo principal (`main`), tornando o programa mais didático:
+
+1. Menu
+2. Definição do Desafio
+3. Localização da posição inicial
+4. Exibição do mapa
+5. Exibição do status
+6. Movimentação
+7. Pontuação
+8. Criação dos mapas (deixado por último devido ao tamanho)
+
+Isso facilita:
+
+* A leitura do código pela professora
+* A apresentação do projeto
+* A compreensão dos colegas
+* A manutenção geral
+
+---
+
+## ✔ 2. Padronização de Mensagens e Saídas Visuais
+
+Para deixar o jogo mais claro e profissional, padronizei:
+
+* Molduras com `==============`
+* Blocos de texto usando **Java Text Blocks (`"""`)**
+* Destaques em mensagens importantes (ex.: movimento inválido)
+* Títulos centralizados visualmente no console
+
+Essa padronização contribui para uma apresentação muito mais legível e organizada.
+
+---
+
+## ✔ 3. Implementação de Mensagem de Status do Jogador
+
+Criei a função:
+
+```java
+public static void exibeStatus(...);
+```
+
+Com bloco visual estruturado e campos alinhados:
+* Movimentos restantes
+* Visualizações restantes
+* Posição atual
+* Comandos possíveis
+
+Esse painel facilita para o jogador se orientar a cada turno.
+
+---
+
+## ✔ 4. Melhoria das Mensagens de Erro
+
+Para não misturar erros com o fluxo normal, destaquei mensagens críticas, como:
+
+### MOVIMENTO INVÁLIDO
+
+Usando linhas separadoras e espaçamento extra para facilitar a visualização no console.
+
+---
+
+## ✔ 5. Ajustes de Integração com o Fluxo Principal
+
+Adaptei todas as funções desenvolvidas por mim para integrarem de forma fácil com:
+* Sistema de movimentação do Jilson
+* Lógica de controle de jogo do Pedro
+
+Todas as funções foram construídas com retornos simples, sem uso de variáveis globais e sem POO, exatamente como exigido pela disciplina.
+
+---
+
+## ✔ 6. Organização Geral e Preparação para Apresentação
+
+Por fim, deixei o código:
+* Comentado nos pontos essenciais
+* Alinhado visualmente
+* Sem linhas soltas ou inconsistentes
+* Seguindo o padrão acordado pelo grupo
+* Pronto para demonstração e leitura pela professora
 
 ---
