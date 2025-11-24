@@ -5,22 +5,15 @@ import java.util.Scanner;
 public class SimuladorLabirinto {
 
     public static void main(String[] args) {
-
         Scanner scan = new Scanner(System.in);
 
-        int movimentos, qtdVisuMapa;
         int dificuldade = exibeMenuEscolha(scan);
+        int[] config = defineDesafio(scan, dificuldade);
 
-        if (dificuldade == 1) {
-            qtdVisuMapa = 5;
-            movimentos = 100;
-        } else if (dificuldade == 2) {
-            qtdVisuMapa = 3;
-            movimentos = 240;
-        } else {
-            qtdVisuMapa = 1;
-            movimentos = 540;
-        }
+        int movimentos = config[0];
+        int qtdVisuMapa = config[1];
+        int movimentosIniciais = movimentos;
+        int visuIniciais = qtdVisuMapa;
 
         char[][] mapa = criaMapa(dificuldade);
         int[] pos = encontraPosicaoInicial(mapa);
@@ -46,7 +39,7 @@ public class SimuladorLabirinto {
                 mostrarMapa = false;
             }
 
-            exibirStatus(movimentos, qtdVisuMapa, pos);
+            exibeStatus(movimentos, qtdVisuMapa, pos);
 
             String entrada = scan.next();
 
@@ -72,13 +65,13 @@ public class SimuladorLabirinto {
 
             char direcao = entrada.toUpperCase().charAt(0);
 
-            Object[] resultado = moverJogador(mapa, pos, direcao);
+            Object[] resultado = moveJogador(mapa, pos, direcao);
 
             boolean movimentoValido = (boolean) resultado[0];
             boolean chegouSaida = (boolean) resultado[2];
 
             if (!movimentoValido) {
-                System.out.println("Movimento inválido!");
+                System.out.println("\n*********** MOVIMENTO INVÁLIDO ***********\n");
                 continue;
             }
 
@@ -86,19 +79,31 @@ public class SimuladorLabirinto {
             movimentos--;
 
             // Corrigido: Vitória deve ser verificada ANTES da derrota.
+            String mensagem;
+            int pontuacao;
             if (chegouSaida) {
-                System.out.println("\n====================================");
-                System.out.println("           PARABÉNS!");
-                System.out.println("       Você encontrou a saída!");
-                System.out.println("====================================");
+                mensagem = """
+                        \n=======================================
+                                        PARABÉNS
+                                Você encontrou a saída!
+                        ======================================= """;
+                System.out.println(mensagem);
+
+                pontuacao = calculaPontuacao(true, movimentosIniciais, movimentos, visuIniciais, qtdVisuMapa);
+                System.out.println("\nSua pontuação final foi: " + pontuacao);
                 break;
             }
 
             if (movimentos <= 0) {
-                System.out.println("\n====================================");
-                System.out.println("        FIM DE JOGO");
-                System.out.println("    Movimentos esgotados");
-                System.out.println("====================================");
+                mensagem = """
+                        \n====================================
+                                    FIM DE JOGO
+                                Movimentos esgotados!
+                        ==================================== """;
+                System.out.println(mensagem);
+
+                pontuacao = calculaPontuacao(false, movimentosIniciais, movimentos, visuIniciais, qtdVisuMapa);
+                System.out.println("\nSua pontuação final foi: " + pontuacao);
                 break;
             }
         }
@@ -106,20 +111,114 @@ public class SimuladorLabirinto {
         scan.close();
     }
 
-    // ---------- Exibir Status ----------
-    public static void exibirStatus(int movimentos, int qtdVisuMapa, int[] pos) {
-        System.out.println("====================================");
-        System.out.println("            STATUS DO JOGADOR       ");
-        System.out.println("====================================");
-        System.out.println("Movimentos restantes : " + movimentos);
-        System.out.println("Visualizações mapa   : " + qtdVisuMapa);
-        System.out.println("Posição atual        : (" + pos[0] + ", " + pos[1] + ")");
-        System.out.println("------------------------------------");
-        System.out.print("Ação [W/A/S/D] | Ver Mapa [E] | Sair [X]: ");
+    // ---------- 1. Menu ----------
+    public static int exibeMenuEscolha(Scanner scan) {
+        String instrucoes = """
+                ====================================
+                            INSTRUÇÕES
+                ====================================
+                Objetivo: alcance o destino (S) antes que seus movimentos acabem.
+                
+                COMANDOS:
+                W - mover para cima
+                S - mover para baixo
+                A - mover para a esquerda
+                D - mover para a direita
+                E - exibir o mapa (usa 1 visualização)
+                X - sair do jogo
+
+                REGRAS:
+                • Cada movimento gasta 1 ponto de movimentação.
+                • Você possui um número limitado de visualizações do mapa.
+                • Ao zerar as visualizações, a tecla 'E' não terá efeito.
+                • Fique atento à sua posição e planeje seus movimentos.
+                """;
+
+        System.out.println(instrucoes);
+
+        System.out.println("""
+        =======================================
+                    ESCOLHA O MAPA
+        =======================================
+        1 - Fácil   (10x10)
+        2 - Médio   (20x20)
+        3 - Difícil (30x30) """);
+
+        int op = 0;
+        while (op < 1 || op > 3) {
+            System.out.print("Opção: ");
+            if (scan.hasNextInt()) {
+                op = scan.nextInt();
+            } else {
+                scan.next();
+            }
+        }
+        return op;
     }
 
-    // ---------- Mover Jogador ----------
-    public static Object[] moverJogador(char[][] mapa, int[] pos, char direcao) {
+    // ---------- 2. Define Desafio ----------
+    public static int[] defineDesafio(Scanner scan, int dificuldade) {
+        System.out.println("Deseja personalizar o desafio?");
+        System.out.println("1 - Sim");
+        System.out.println("2 - Não");
+        System.out.print("Opção: ");
+
+        int escolha = scan.nextInt();
+
+        int movimentos = 0;
+        int visu = 0;
+
+        if (escolha == 1) {
+            System.out.print("Digite a quantidade de movimentos: ");
+            movimentos = scan.nextInt();
+            System.out.print("Digite a quantidade de visualizações: ");
+            visu = scan.nextInt();
+        } else {
+            switch (dificuldade) {
+                case 1 : visu = 5; movimentos = 100; break;
+                case 2 : visu = 3; movimentos = 240; break;
+                case 3 : visu = 1; movimentos = 540; break;
+            }
+        }
+
+        return new int[]{movimentos, visu};
+    }
+
+    // ---------- 3. Encontra P ----------
+    public static int[] encontraPosicaoInicial(char[][] mapa) {
+        for (int i = 0; i < mapa.length; i++)
+            for (int j = 0; j < mapa[i].length; j++)
+                if (mapa[i][j] == 'P')
+                    return new int[]{i, j};
+        return null;
+    }
+
+    // ---------- 4. Exibe Mapa ----------
+    public static void exibeMapa(char[][] mapa) {
+        System.out.println();
+        for (char[] linha : mapa) {
+            for (char c : linha) System.out.print(c + " ");
+            System.out.println();
+        }
+        System.out.println();
+    }
+
+    // ---------- 5. Exibe Status ----------
+    public static void exibeStatus(int movimentos, int qtdVisuMapa, int[] pos) {
+        String mensagemStatus = """
+        ==========================================
+                    STATUS DO JOGADOR
+        ==========================================
+        Movimentos restantes : %d
+        Visualizações mapa   : %d
+        Posição atual        : (%d, %d)
+        ------------------------------------------
+        Ação [W/A/S/D] | Ver Mapa [E] | Sair [X]: """;
+        System.out.printf(mensagemStatus, movimentos, qtdVisuMapa, pos[0], pos[1]);
+    }
+
+    // ---------- 6. Move Jogador ----------
+    public static Object[] moveJogador(char[][] mapa, int[] pos, char direcao) {
 
         int r = pos[0], c = pos[1];
         int nr = r, nc = c;
@@ -148,65 +247,15 @@ public class SimuladorLabirinto {
         return new Object[]{true, new int[]{nr, nc}, chegouSaida};
     }
 
-    // ---------- Menu ----------
-    public static int exibeMenuEscolha(Scanner scan) {
-        System.out.println("====================================");
-        System.out.println("             INSTRUÇÕES              ");
-        System.out.println("====================================");
-        System.out.println("Objetivo: alcance o destino (S) antes que seus movimentos acabem.");
-        System.out.println();
-        System.out.println("COMANDOS:");
-        System.out.println("  W - mover para cima");
-        System.out.println("  S - mover para baixo");
-        System.out.println("  A - mover para a esquerda");
-        System.out.println("  D - mover para a direita");
-        System.out.println("  E - exibir o mapa (usa 1 visualização)");
-        System.out.println("  X - sair do jogo");
-        System.out.println();
-        System.out.println("REGRAS:");
-        System.out.println("  • Cada movimento gasta 1 ponto de movimentação.");
-        System.out.println("  • Você possui um número limitado de visualizações do mapa.");
-        System.out.println("  • Ao zerar as visualizações, a tecla 'E' não terá efeito.");
-        System.out.println("  • Fique atento à sua posição e planeje seus movimentos.");
-
-        System.out.println("""
-        ====================================
-                  ESCOLHA O MAPA
-        ====================================
-        1 - Fácil   (10x10)
-        2 - Médio   (20x20)
-        3 - Difícil (30x30)
-        """);
-
-        int op = 0;
-        while (op < 1 || op > 3) {
-            System.out.print("Opção: ");
-            if (scan.hasNextInt()) {
-                op = scan.nextInt();
-            } else {
-                scan.next();
-            }
+    // ---------- 7. Calcula Pontuação ----------
+    public static int calculaPontuacao(boolean venceu, int movimentosIniciais, int movimentosRestantes, int visuInicial, int visuRestante) {
+        if (venceu) {
+            return 2000 + (movimentosRestantes * 10) + (visuRestante * 20);
+        } else {
+            int movimentosUsados = movimentosIniciais - movimentosRestantes;
+            int visuUsada = visuInicial - visuRestante;
+            return (movimentosUsados * 3) + (visuUsada * 5);
         }
-        return op;
-    }
-
-    // ---------- Encontrar P ----------
-    public static int[] encontraPosicaoInicial(char[][] mapa) {
-        for (int i = 0; i < mapa.length; i++)
-            for (int j = 0; j < mapa[i].length; j++)
-                if (mapa[i][j] == 'P')
-                    return new int[]{i, j};
-        return null;
-    }
-
-    // ---------- Exibir Mapa ----------
-    public static void exibeMapa(char[][] mapa) {
-        System.out.println();
-        for (char[] linha : mapa) {
-            for (char c : linha) System.out.print(c + " ");
-            System.out.println();
-        }
-        System.out.println();
     }
 
     // ---------- Mapas ----------
