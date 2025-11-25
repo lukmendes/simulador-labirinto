@@ -5,9 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="804f6559-a8af-412c-a745-1a6c1a053a2c" name="Changes" comment="finalização etapa 1">
+      <change afterPath="$PROJECT_DIR$/simulador-labirinto.eml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/labirinto/SimuladorLabirinto.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/labirinto/SimuladorLabirinto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulador-labirinto.iml" beforeDir="false" afterPath="$PROJECT_DIR$/simulador-labirinto.iml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -31,6 +31,9 @@
   &quot;associatedIndex&quot;: 5
 }</component>
   <component name="ProjectId" id="35cUEHbwZtqOuupSCUwgyxNLYrt" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
